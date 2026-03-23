@@ -1,0 +1,16 @@
+{
+  "name": "appier-cc-plugins",
+  "description": "Appier Claude Code plugins — Jira integration and developer productivity tools",
+  "owner": {
+    "name": "William Hung"
+  },
+  "plugins": [
+    {
+      "name": "cs-jira-query",
+      "description": "Query Jira tickets and warm-up commands for BE/FE backlog spec clarification",
+      "version": "1.0.0",
+      "source": "./cs-jira-query",
+      "category": "productivity"
+    }
+  ]
+}
