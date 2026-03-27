@@ -16,7 +16,7 @@ Start working on an actionable Jira task by setting up the workspace and generat
    python3 ${CLAUDE_PLUGIN_ROOT}/scripts/jira.py details <KEY>
    ```
 
-3. Parse the repo name from the title pattern `[BE][<repo-name>] ...`. If the pattern doesn't match, ask the user which repo this ticket belongs to.
+3. Parse the repo name from the title pattern `[BE|FE][<repo-name>] ...`. If the pattern doesn't match, ask the user which repo this ticket belongs to.
 
 4. Validate the repo exists at `$PLAXIE_PROJECT_ROOT/<repo-name>`. If `PLAXIE_PROJECT_ROOT` is not set or the repo doesn't exist, ask the user for the correct path.
 

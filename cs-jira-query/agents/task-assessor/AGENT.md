@@ -24,16 +24,17 @@ Record: title, status, assignee, story points, full description, linked issues, 
 
 ### 2. Parse repo name from title
 
-Jira titles follow the pattern `[BE][<repo-name>] <description>`.
+Jira titles follow the pattern `[BE|FE][<repo-name>] <description>`.
 
 Extract `<repo-name>` from between the second pair of brackets. Examples:
 - `[BE][creative-studio] Add export endpoint` → `creative-studio`
-- `[BE][media-center-ui] Fix upload bug` → `media-center-ui`
+- `[FE][media-center-ui] Fix upload bug` → `media-center-ui`
+- `[BE][trading-desk-services] Add retry logic` → `trading-desk-services`
 
 If the title does not match this pattern, return a **Flagged** result:
 ```
 ⚠ <KEY>: <Title>
-  Could not parse repo name from title — expected pattern: [BE][<repo-name>] ...
+  Could not parse repo name from title — expected pattern: [BE|FE][<repo-name>] ...
   → User must provide the correct repo path
 ```
 

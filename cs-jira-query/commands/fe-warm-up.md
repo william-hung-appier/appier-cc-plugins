@@ -1,64 +1,76 @@
 ---
-description: "Pull [FE] backlog tasks up to 10 story points with FACT/ASSUME spec clarification insights"
-allowed-tools: ["Bash", "Read"]
+description: "Pull [FE] backlog Tasks+Bugs, inspect codebases on staging, assess actionability with FACT/ASSUME analysis"
+allowed-tools: ["Bash", "Read", "Agent"]
 ---
 
 # FE Warm-Up
 
-Pull frontend backlog tasks and help the user understand what needs clarification before starting work.
+Pull frontend backlog tasks (Tasks and Bugs only), inspect each task's codebase on staging, and assess whether each task is actionable or needs clarification.
 
 ## Steps
 
-1. Run via Bash:
+1. Fetch backlog tasks via Bash:
    ```
-   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/jira.py backlog CR --sp 10 --prefix "[FE]"
-   ```
-
-2. For each task returned, get its full details (with description):
-   ```
-   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/jira.py get <KEY>
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/jira.py backlog CR --sp 10 --prefix "[FE]" --type "Task,Bug"
    ```
 
-3. Present a warm-up report using this format for each task:
+2. Parse the output to extract all ticket keys (e.g., CR-456, CR-789).
+
+3. For each ticket key, spawn a `task-assessor` agent in parallel. Each agent independently:
+   - Fetches full ticket details
+   - Parses the repo name from the title
+   - Inspects the codebase on `origin/staging`
+   - Returns an actionable/unclear/flagged verdict
+
+   Use the Agent tool with one call per ticket, all in a single message for parallel execution.
+
+4. Once all agents return, aggregate results into this report format:
 
 ---
 
-### <KEY>: <Title> (SP: N)
+## FE Warm-Up Report
 
-**Assignee:** <name or Unassigned>
+### Actionable Tasks
+For each task where the assessor returned actionable:
+```
+✓ <KEY>: <Title> (SP: N)
+  Code area: <files/modules from assessor>
+  Ready to implement.
+```
 
+### Tasks Needing Clarification
+For each task where the assessor returned needs clarification:
+```
+✗ <KEY>: <Title> (SP: N)
 <FACT>
-- State what the ticket title and description explicitly say
-- What is concretely defined: components, pages, UI elements named
-- Any acceptance criteria, designs, or mockups referenced
+<from assessor output>
 </FACT>
-
 <ASSUME>
-- What the task likely involves based on the title/description context
-- Potential dependencies on backend APIs or design assets
-- Scope boundaries that seem implied but aren't confirmed
+<from assessor output>
 </ASSUME>
+Questions for reporter:
+<from assessor output>
+```
 
-<SUGGEST>
-Questions to clarify before starting:
-- [ ] <specific question about ambiguous scope>
-- [ ] <question about design specs or UI/UX requirements>
-- [ ] <question about API dependencies or data contracts>
-</SUGGEST>
+### Flagged
+For each task where the assessor returned flagged:
+```
+⚠ <KEY>: <Title> (SP: N)
+  <reason from assessor>
+  → <action needed>
+```
+
+**Summary:**
+- Total: N tasks | X SP
+- Actionable: N | Needs clarification: N | Flagged: N
 
 ---
-
-4. End with a summary:
-
-**Warm-Up Summary:**
-- Total tasks: N | Total SP: X
-- Tasks with clear scope: list keys
-- Tasks needing clarification: list keys with one-line reason each
 
 ## Rules
 
-- Keep each task analysis concise — 3-5 bullet points per section max
-- Focus FACT on what the ticket *actually says*, not what you infer
-- Focus ASSUME on what a frontend engineer would need to know
-- SUGGEST should be actionable questions the user can take to a PM or designer
-- If a task has no description, flag it prominently — that's a red flag for scope clarity
+- Always fetch the backlog first before spawning agents
+- Spawn all task-assessor agents in parallel (one Agent tool call per ticket, all in the same message)
+- If the backlog returns zero tasks, report that clearly and stop
+- Preserve the assessor's FACT/ASSUME output exactly — do not rewrite or summarize it
+- Include story points in each task's header line
+- Group results by verdict type (actionable, unclear, flagged) for easy scanning
