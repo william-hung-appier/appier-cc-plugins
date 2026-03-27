@@ -43,6 +43,9 @@ export PLAXIE_PROJECT_ROOT=/path/to/your/plaxie    # required for /be-warm-up co
 | **Command: /cs-jira-query:be-warm-up** | Pull [BE] Tasks+Bugs, inspect codebases on staging, assess actionability |
 | **Command: /cs-jira-query:fe-warm-up** | Pull [FE] backlog tasks with FACT/ASSUME analysis |
 | **Command: /cs-jira-query:jira-details** | Deep-dive a ticket with linked issues, subtasks, FACT/ASSUME analysis |
+| **Command: /cs-jira-query:task-kickoff** | Start working on a task — create branch from staging, generate implementation plan |
+| **Skill: jira-clarify** | Auto-triggers to format clarification questions for ticket reporters |
+| **Skill: staging-check** | Auto-triggers to check staging branch status for any repo |
 
 **CLI usage** (also works standalone):
 
