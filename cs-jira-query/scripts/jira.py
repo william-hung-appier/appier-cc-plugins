@@ -6,7 +6,8 @@ Usage:
   jira.py get <KEY> --comments                         # with last 5 comments
   jira.py details <KEY>                                # full details + links + subtasks
   jira.py search "<JQL>" [--max N]                     # JQL search (default 20)
-  jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"] # backlog up to N story points
+  jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"] [--type "Task,Bug"]
+                                                       # backlog up to N SP
 """
 
 import json
@@ -249,15 +250,19 @@ def cmd_backlog(cfg, args):
     positional, opts = parse_opts(args, {
         "--sp": (int, 10),
         "--prefix": (str, ""),
+        "--type": (str, ""),
     })
     if not positional:
-        print('Usage: jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"]')
+        print('Usage: jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"] [--type "Task,Bug"]')
         sys.exit(1)
 
     project = positional[0]
     jql = f"project = {project} AND status = Backlog"
     if opts["--prefix"]:
         jql += f' AND summary ~ "\\"{opts["--prefix"]}\\""'
+    if opts["--type"]:
+        types = ", ".join(f'"{t.strip()}"' for t in opts["--type"].split(","))
+        jql += f" AND issuetype in ({types})"
     jql += " ORDER BY rank ASC"
 
     data = api_get(cfg, "/rest/api/3/search/jql", {
@@ -287,8 +292,8 @@ Commands:
   jira.py get <KEY> --comments         Include last 5 comments
   jira.py details <KEY>               Full details with linked issues & subtasks
   jira.py search "<JQL>" [--max N]     JQL search (default 20 results)
-  jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"]
-                                       Backlog tasks up to N SP, filtered by title prefix
+  jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"] [--type "Task,Bug"]
+                                       Backlog tasks up to N SP, filtered by prefix/type
 
 Examples:
   jira.py get CR-123
@@ -297,6 +302,7 @@ Examples:
   jira.py search "assignee = currentUser() AND status != Done"
   jira.py backlog BE --sp 15
   jira.py backlog CR --sp 10 --prefix "[BE]"
+  jira.py backlog CR --sp 10 --prefix "[BE]" --type "Task,Bug"
 
 Env vars required: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN"""
 
