@@ -4,6 +4,7 @@
 Usage:
   jira.py get <KEY>                                    # single ticket
   jira.py get <KEY> --comments                         # with last 5 comments
+  jira.py details <KEY>                                # full details + links + subtasks
   jira.py search "<JQL>" [--max N]                     # JQL search (default 20)
   jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"] # backlog up to N story points
 """
@@ -133,6 +134,57 @@ def format_search(issues, target_sp=0):
         print(r)
 
 
+def format_details(fields, key):
+    """Format a ticket with full description, linked issues, and subtasks."""
+    print(f"Key: {key}")
+    print(f"Title: {fields.get('summary', '')}")
+    print(f"Status: {fields.get('status', {}).get('name', 'Unknown')}")
+
+    assignee = fields.get("assignee")
+    print(f"Assignee: {assignee['displayName'] if assignee else 'Unassigned'}")
+
+    sp = fields.get(STORY_POINTS_FIELD)
+    if sp is not None:
+        print(f"Story Points: {sp}")
+
+    desc_raw = fields.get("description")
+    if desc_raw:
+        desc = extract_text(desc_raw) if isinstance(desc_raw, dict) else str(desc_raw)
+    else:
+        desc = "No description"
+    print(f"\nDescription:\n{desc}")
+
+    links = fields.get("issuelinks", [])
+    if links:
+        print("\nLinked Issues:")
+        for link in links:
+            link_type = link.get("type", {})
+            if "outwardIssue" in link:
+                issue = link["outwardIssue"]
+                rel = link_type.get("outward", "relates to")
+            elif "inwardIssue" in link:
+                issue = link["inwardIssue"]
+                rel = link_type.get("inward", "relates to")
+            else:
+                continue
+            issue_key = issue.get("key", "?")
+            issue_summary = issue.get("fields", {}).get("summary", "")
+            print(f"- {rel} {issue_key}: {issue_summary}")
+    else:
+        print("\nLinked Issues: None")
+
+    subtasks = fields.get("subtasks", [])
+    if subtasks:
+        print("\nSubtasks:")
+        for st in subtasks:
+            st_key = st.get("key", "?")
+            st_summary = st.get("fields", {}).get("summary", "")
+            st_status = st.get("fields", {}).get("status", {}).get("name", "?")
+            print(f"- {st_key}: {st_summary} | {st_status}")
+    else:
+        print("\nSubtasks: None")
+
+
 # --- Arg parsing ---
 
 def parse_opts(args, spec):
@@ -216,12 +268,24 @@ def cmd_backlog(cfg, args):
     format_search(data.get("issues", []), opts["--sp"])
 
 
+def cmd_details(cfg, args):
+    if not args:
+        print("Usage: jira.py details <KEY>")
+        sys.exit(1)
+
+    key = args[0]
+    req_fields = f"{BASE_FIELDS},description,issuelinks,subtasks"
+    data = api_get(cfg, f"/rest/api/3/issue/{key}", {"fields": req_fields})
+    format_details(data["fields"], data["key"])
+
+
 HELP = """\
 Jira Query — token-efficient CLI (API v3)
 
 Commands:
   jira.py get <KEY>                    Single ticket details
   jira.py get <KEY> --comments         Include last 5 comments
+  jira.py details <KEY>               Full details with linked issues & subtasks
   jira.py search "<JQL>" [--max N]     JQL search (default 20 results)
   jira.py backlog <PROJECT> [--sp N] [--prefix "[BE]"]
                                        Backlog tasks up to N SP, filtered by title prefix
@@ -229,6 +293,7 @@ Commands:
 Examples:
   jira.py get CR-123
   jira.py get CR-123 --comments
+  jira.py details CR-123
   jira.py search "assignee = currentUser() AND status != Done"
   jira.py backlog BE --sp 15
   jira.py backlog CR --sp 10 --prefix "[BE]"
@@ -239,6 +304,7 @@ COMMANDS = {
     "get": cmd_get,
     "search": cmd_search,
     "backlog": cmd_backlog,
+    "details": cmd_details,
 }
 
 if __name__ == "__main__":
