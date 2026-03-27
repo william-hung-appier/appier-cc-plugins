@@ -17,6 +17,7 @@ Run via Bash: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/jira.py <command>`
 | JQL search | `jira.py search "assignee = currentUser() AND status != Done"` |
 | Backlog up to N story points | `jira.py backlog CR --sp 10` |
 | Backlog filtered by title prefix | `jira.py backlog CR --sp 10 --prefix "[BE]"` |
+| Backlog filtered by issue type | `jira.py backlog CR --sp 10 --prefix "[BE]" --type "Task,Bug"` |
 
 ## Rules
 
