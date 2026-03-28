@@ -1,0 +1,60 @@
+{
+  "skill_name": "okr-constructor",
+  "evals": [
+    {
+      "id": 1,
+      "name": "quarterly-review-q1",
+      "prompt": "help me query 2026 Q1 jira tasks that is assigned by me and use SMART principle to evaluate each task value. Yes the dates 2026-01-01 to 2026-03-31 are correct, go ahead.",
+      "expected_output": "A structured report with SMART scoring table, per-task FACT/ASSUME breakdown, and constructed OKRs grouped by theme",
+      "files": [],
+      "expectations": [
+        "Report contains a SMART summary table with columns for S, M, A, R, T scores using symbols",
+        "Each task has a FACT block with observable Jira data",
+        "Each task has an ASSUME block with interpretive analysis",
+        "Each task has a SUGGEST block with specific improvement recommendations",
+        "Report contains constructed OKRs grouped by theme with Objectives and Key Results",
+        "Each Key Result references specific ticket keys as evidence",
+        "Report includes OKR Quality Assessment with FACT/ASSUME per objective group",
+        "Report ends with actionable recommendations for task quality and OKR strength",
+        "The Jira query used correct date range and assignee filter",
+        "Each task includes a Theme label for OKR grouping"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "casual-score-request",
+      "prompt": "how well-defined are my CR tickets from last month? score them and help me build OKRs. Yes the date range is correct.",
+      "expected_output": "SMART evaluation of tasks from the previous month with OKR construction, despite casual phrasing",
+      "files": [],
+      "expectations": [
+        "Report contains a SMART summary table with S, M, A, R, T scores",
+        "Each task has FACT, ASSUME, and SUGGEST blocks",
+        "The date range was correctly interpreted as February 2026",
+        "Report contains constructed OKRs with Objectives and Key Results",
+        "Each Key Result references specific ticket keys as evidence",
+        "Report includes a SMART Health Summary with average score and strongest/weakest dimensions",
+        "Report includes recommendations section",
+        "Casual phrasing did not degrade output structure or completeness"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "explicit-okr-build",
+      "prompt": "I need to prepare my quarterly OKR report. Pull my CR tasks from Q4 2025 (Oct-Dec), SMART-score each one, then construct OKRs from them grouped by theme. The dates 2025-10-01 to 2025-12-31 are confirmed.",
+      "expected_output": "Full SMART evaluation + OKR construction with clear theme grouping and quality assessment per OKR",
+      "files": [],
+      "expectations": [
+        "Report contains a SMART summary table with S, M, A, R, T scores",
+        "Each task has FACT, ASSUME, and SUGGEST blocks",
+        "The Jira query used date range 2025-10-01 to 2025-12-31",
+        "Report contains OKRs explicitly grouped by theme",
+        "Each Objective is written as an outcome, not an activity",
+        "Each Key Result is quantifiable and references ticket keys",
+        "Report includes OKR Quality Assessment per theme group",
+        "Report includes both Task Quality and OKR Strength recommendations",
+        "Tasks are grouped into at least 1 theme",
+        "Report includes total tasks count, total SP, and average SMART score"
+      ]
+    }
+  ]
+}
